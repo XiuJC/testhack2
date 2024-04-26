@@ -1,0 +1,152 @@
+import java.lang.Math;
+
+import static java.lang.Math.pow;
+
+public class multi {
+
+    public static int length_count(int number){
+        int n = 0;
+
+        //if the number is zero
+        if (number == 0)
+            n = 0;
+        else {
+            do {
+                n++;
+                number /= 10;
+            }
+            while (number != 0);
+        }
+        return n;
+    }
+
+    public static int PartialProduct (int multiplicand, int no_length,
+                                      int digit_mult, int pp){
+        //This path is for either 1 digit number multiplication
+        //or accumulate the whole partial product to return
+        if (no_length == 1){
+
+            pp = multiplicand * digit_mult % 10 + pp;
+
+            return pp;
+        }
+        else{
+            int temp = multiplicand;
+            //reduce the multiplicand to the largest digit of its number to
+            //start adding its partial product and carrier to the whole
+            //exp: multiplicand: 345 / digit_mult: 5
+            //tens = 10 ^ (3-1) = 10 ^ 2 = 100
+            // 345 / 100 = 3
+            // multiplied back tens for pp
+            // pp = 3 * 5 % 10 * 100 = 5 * 100 = 500
+            int tens = (int) pow(10, (no_length - 1));
+            multiplicand = multiplicand / tens;
+
+            pp = multiplicand * digit_mult % 10 * tens + pp;
+
+            //reduce and pass the number to this very same method
+            return PartialProduct(temp % tens,
+                    no_length - 1, digit_mult, pp);
+        }
+
+
+    }
+    public static int PartialProduct (int multiplicand, int no_length,
+                                      int digit_mult){
+        return PartialProduct(multiplicand, no_length, digit_mult, 0);
+    }
+    public static int Carrier (int multiplicand, int no_length,
+                               int digit_mult, int carr){
+        //Part 1: Assign a static element for multiplicand;
+        //        If multiplicand is multiplying ones of multiplier,
+        //        then count the pp and carr straight.
+        if (no_length == 1){
+
+            carr = multiplicand * digit_mult / 10 + carr;
+
+            return carr;
+        }
+        //Part 2: If no_length is not ones,or have number larger than 10
+        // such as 456 then enter this to reduce the multiplicand in tens
+        else{
+            int temp = multiplicand;
+            //reduce the multiplicand to the largest digit of its number to
+            //start adding its partial product and carrier to the whole
+            //exp: multiplicand: 345 / digit_mult: 5
+            //tens = 10 ^ (3-1) = 10 ^ 2 = 100
+            // 345 / 100 = 3
+            // multiplied back tens for carrier
+            // carr = 3 * 5 / 10 * tens = 1 * 100 = 100
+            int tens = (int) pow(10, (no_length - 1));
+            multiplicand = multiplicand / tens;
+
+            carr = multiplicand * digit_mult / 10 * tens + carr;
+
+            //reduce and pass the number to this very same method
+            return Carrier(temp % tens,
+                    no_length - 1, digit_mult, carr);
+        }
+    }
+    public static int Carrier (int multiplicand, int no_length,
+                                      int digit_mult){
+        return Carrier(multiplicand, no_length, digit_mult, 0);
+    }
+
+    // 26/4: Only can print partial product and carrier since didn't
+    // consider putting another 10 into the print function as
+    // thought that both of them can be extracted
+    public static void Simple_mult (int multiplicand, int multiplier){
+        //calculate the numbers inside multiplicand/multiplier
+        //since both have same number length
+        int no_length = length_count(multiplicand);
+
+        for (int i = 0; i < no_length; i++)
+            System.out.print(" ");
+        System.out.println(multiplicand);
+        for (int i = 0; i < no_length; i++)
+            System.out.print(" ");
+        System.out.println(multiplier);
+        System.out.println("--------------------");
+
+        //Recursive method for calculating partial product and carrier
+        int digit, total = 0;
+        for (int i = 0; i < no_length; i++){
+            //digit is the part of the single number from the multiplier
+            //which starts from ones, tens, thousands and above
+            digit = multiplier % ((int)pow(10, i+1)) / ((int)pow(10, i));
+
+            //print out the space
+            for(int j = 0; j < (no_length-i); j++)
+                System.out.print(" ");
+            //calculate the partial product and
+            //print out the 0 not included in the partial product
+            int partial_product = PartialProduct(multiplicand, no_length, digit);
+            int PP_length = length_count(partial_product);
+            for(int j=0; j < (no_length - PP_length); j++)
+                System.out.print("0");
+            //print out the partial product
+            System.out.println(partial_product);
+
+            //print out the space
+            for(int j = 0; j < (no_length-i-1); j++)
+                System.out.print(" ");
+            //calculate the carrier and
+            //print out the 0 not included in the carrier
+            int carrier = Carrier(multiplicand, no_length, digit);
+            int carrier_length = length_count(carrier);
+            for(int j=0; j < (no_length - carrier_length); j++)
+                System.out.print("0");
+            //print out the carrier
+            System.out.println(carrier);
+
+            total+= (int) ((partial_product + (carrier* 10)) * pow(10, i));
+        }
+
+
+        System.out.println("_____________________");
+        int total_length = length_count(total);
+        for(int i=0; i < (no_length * 2 - total_length); i++)
+            System.out.print(" ");
+        System.out.println(total);
+
+    }
